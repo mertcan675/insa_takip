@@ -1,271 +1,135 @@
 import streamlit as st
-
 import pandas as pd
-
 import os
-
 import hashlib
-
 from datetime import datetime
 
 # --- GÜVENLİK VE ŞİFRELEME ---
-
 def make_hashes(password):
-
     return hashlib.sha256(str.encode(password)).hexdigest()
 
-def check_hashes(password, hashed_text):
-
-    if make_hashes(password) == hashed_text:
-
-        return hashed_text
-
-    return False
-
 # --- VERİ TABANI AYARLARI ---
-
 DB_FILE = "insa_takip_db.csv"
-
 USER_DB = "users_db.csv"
 
-# Veritabanı dosyalarını kontrol et ve oluştur
-
 if not os.path.exists(USER_DB):
-
     pd.DataFrame(columns=['username', 'password', 'role']).to_csv(USER_DB, index=False)
 
 def veriyi_getir():
-
     if os.path.exists(DB_FILE):
-
         return pd.read_csv(DB_FILE).to_dict('records')
-
+   
+    # 🏗️ KABA VE İNCE İNŞAAT BİRLEŞİK SIRALAMA
     return [
-
-        {"id": 1, "is": "1. Kaba Tesisat (Elektrik-Su)", "durum": "Bekliyor", "usta": "Tesisat Ekibi", "tarih": "-", "kanit": "-"},
-
-        {"id": 2, "is": "2. Dış Cephe Mantolama", "durum": "Bekliyor", "usta": "Dış Cephe Ekibi", "tarih": "-", "kanit": "-"},
-
-        {"id": 3, "is": "3. Kapı ve Pencere Doğramaları", "durum": "Bekliyor", "usta": "Doğrama Ekibi", "tarih": "-", "kanit": "-"},
-
-        {"id": 4, "is": "4. Kaba Sıva", "durum": "Bekliyor", "usta": "Sıva Ekibi", "tarih": "-", "kanit": "-"},
-
-        {"id": 5, "is": "5. Şap Dökümü", "durum": "Bekliyor", "usta": "Şap Ekibi", "tarih": "-", "kanit": "-"},
-
-        {"id": 6, "is": "6. Alçı Sıva ve Saten", "durum": "Bekliyor", "usta": "Alçıcı", "tarih": "-", "kanit": "-"},
-
-        {"id": 7, "is": "7. Islak Hacim İzolasyonu", "durum": "Bekliyor", "usta": "İzolasyon Ekibi", "tarih": "-", "kanit": "-"},
-
-        {"id": 8, "is": "8. Seramik ve Fayans", "durum": "Bekliyor", "usta": "Fayansçı", "tarih": "-", "kanit": "-"},
-
-        {"id": 9, "is": "9. Parke ve Süpürgelik", "durum": "Bekliyor", "usta": "Parkeci", "tarih": "-", "kanit": "-"},
-
-        {"id": 10, "is": "10. Kapı Kasaları ve Mutfak Dolapları", "durum": "Bekliyor", "usta": "Mobilyacı", "tarih": "-", "kanit": "-"},
-
-        {"id": 11, "is": "11. Son Kat Boya ve Aksesuarlar", "durum": "Bekliyor", "usta": "Boya Ekibi", "tarih": "-", "kanit": "-"}
-
+        {"id": 1, "is": "K1. Hafriyat ve Temel Kazısı", "durum": "Bekliyor", "etap": "Kaba", "tarih": "-", "kanit": "-"},
+        {"id": 2, "is": "K2. Temel Donatı ve Beton", "durum": "Bekliyor", "etap": "Kaba", "tarih": "-", "kanit": "-"},
+        {"id": 3, "is": "K3. Kolon ve Perde Betonlar", "durum": "Bekliyor", "etap": "Kaba", "tarih": "-", "kanit": "-"},
+        {"id": 4, "is": "K4. Kat Tabliye Betonu", "dur_": "Bekliyor", "etap": "Kaba", "tarih": "-", "kanit": "-"},
+        {"id": 5, "is": "K5. Dış ve İç Tuğla Duvarlar", "durum": "Bekliyor", "etap": "Kaba", "tarih": "-", "kanit": "-"},
+        {"id": 6, "is": "K6. Çatı Çelik/Ahşap Karkas", "durum": "Bekliyor", "etap": "Kaba", "tarih": "-", "kanit": "-"},
+        {"id": 7, "is": "İ1. Elektrik-Su Kaba Tesisat", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 8, "is": "İ2. Kapı ve Pencere Doğramaları", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 9, "is": "İ3. Dış Cephe Mantolama", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 10, "is": "İ4. Kaba Sıva (İç Cephe)", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 11, "is": "İ5. Yerden Isıtma / Tesisat Döşeme", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 12, "is": "İ6. Şap Dökümü", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 13, "is": "İ7. Alçı Sıva ve Asma Tavan", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 14, "is": "İ8. Banyo İzolasyonu", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 15, "is": "İ9. Seramik ve Fayans Döşeme", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 16, "is": "İ10. Parke ve Süpürgelik", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 17, "is": "İ11. İç Kapı Montajı", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 18, "is": "İ12. Mutfak ve Banyo Dolapları", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 19, "is": "İ13. Vitrifiye (Musluk, Lavabo)", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"},
+        {"id": 20, "is": "İ14. Son Kat Boya ve Temizlik", "durum": "Bekliyor", "etap": "İnce", "tarih": "-", "kanit": "-"}
     ]
 
 def veriyi_kaydet(liste):
-
     pd.DataFrame(liste).to_csv(DB_FILE, index=False)
 
-# --- OTURUM YÖNETİMİ ---
-
 if 'logged_in' not in st.session_state:
-
     st.session_state.logged_in = False
-
 if 'db' not in st.session_state:
-
     st.session_state.db = veriyi_getir()
 
-# --- ARAYÜZ AYARLARI ---
+st.set_page_config(page_title="Pro-Build Full", layout="wide", page_icon="🏗️")
 
-st.set_page_config(page_title="Pro-Build Enterprise", layout="wide", page_icon="🏗️")
-
-# --- GİRİŞ / KAYIT EKRANI ---
-
+# --- LOGIN / SIGNUP (Öncekiyle aynı yapı) ---
 if not st.session_state.logged_in:
-
-    st.title("🏗️ Pro-Build Giriş Sistemi")
-
-    auth_mode = st.tabs(["Giriş Yap", "Kayıt Ol"])
-
-   
-
-    with auth_mode[0]: # GİRİŞ
-
-        user = st.text_input("E-posta / Kullanıcı Adı")
-
-        pw = st.text_input("Şifre", type='password')
-
-        if st.button("Giriş Yap", use_container_width=True):
-
+    st.title("🏗️ Pro-Build Giriş Paneli")
+    tab1, tab2 = st.tabs(["Giriş", "Kayıt"])
+    with tab1:
+        u = st.text_input("E-posta")
+        p = st.text_input("Şifre", type='password')
+        if st.button("Giriş"):
             users = pd.read_csv(USER_DB)
-
-            hashed_pw = make_hashes(pw)
-
-            result = users[(users['username'] == user) & (users['password'] == hashed_pw)]
-
-            if not result.empty:
-
+            if not users[(users['username'] == u) & (users['password'] == make_hashes(p))].empty:
                 st.session_state.logged_in = True
-
-                st.session_state.user_role = result.iloc[0]['role']
-
-                st.session_state.username = user
-
+                st.session_state.user_role = users[users['username'] == u].iloc[0]['role']
+                st.session_state.username = u
                 st.rerun()
+            else: st.error("Hata!")
+    with tab2:
+        nu = st.text_input("Yeni E-posta")
+        np = st.text_input("Yeni Şifre", type='password')
+        nr = st.selectbox("Rol", ["Patron / Mühendis", "Usta Paneli"])
+        if st.button("Kayıt"):
+            new_data = pd.DataFrame([[nu, make_hashes(np), nr]], columns=['username', 'password', 'role'])
+            new_data.to_csv(USER_DB, mode='a', header=False, index=False)
+            st.success("Tamamdır!")
 
-            else:
-
-                st.error("Hatalı bilgiler!")
-
-    with auth_mode[1]: # KAYIT
-
-        new_user = st.text_input("E-posta Seçin")
-
-        new_pw = st.text_input("Şifre Belirleyin", type='password')
-
-        role = st.selectbox("Rolünüz", ["Patron / Mühendis", "Usta Paneli"])
-
-        if st.button("Kayıt Ol", use_container_width=True):
-
-            users = pd.read_csv(USER_DB)
-
-            if new_user in users['username'].values:
-
-                st.warning("Bu kullanıcı zaten mevcut.")
-
-            else:
-
-                new_data = pd.DataFrame([[new_user, make_hashes(new_pw), role]], columns=['username', 'password', 'role'])
-
-                new_data.to_csv(USER_DB, mode='a', header=False, index=False)
-
-                st.success("Kayıt başarılı! Giriş yapabilirsiniz.")
-
-# --- ANA UYGULAMA PANELİ ---
-
+# --- ANA PANEL ---
 else:
-
-    # Sidebar
-
-    st.sidebar.title("🏗️ PRO-BUILD")
-
-    st.sidebar.write(f"Kullanıcı: **{st.session_state.username}**")
-
-    st.sidebar.write(f"Yetki: **{st.session_state.user_role}**")
-
-    if st.sidebar.button("Çıkış Yap"):
-
+    st.sidebar.title("PRO-BUILD FULL")
+    st.sidebar.write(f"**{st.session_state.username}**")
+    if st.sidebar.button("Çıkış"):
         st.session_state.logged_in = False
-
         st.rerun()
 
-    # --- USTA PANELİ ---
-
     if st.session_state.user_role == "Usta Paneli":
-
-        st.header("👷 Saha İş Teslim Ekranı")
-
-        yapilacak_isler = [i["is"] for i in st.session_state.db if i["durum"] in ["Bekliyor", "Reddedildi"]]
-
-       
-
-        if yapilacak_isler:
-
-            secilen = st.selectbox("Bitirdiğiniz İş:", yapilacak_isler)
-
-            foto = st.file_uploader("📷 Fotoğraf Yükle (Zorunlu)", type=['jpg', 'png', 'jpeg'])
-
-            if st.button("Onaya Gönder", use_container_width=True):
-
-                if foto:
-
-                    for is_kalemi in st.session_state.db:
-
-                        if is_kalemi["is"] == secilen:
-
-                            is_kalemi["durum"] = "Onay Bekliyor"
-
-                            is_kalemi["tarih"] = datetime.now().strftime("%d-%m-%Y %H:%M")
-
-                    veriyi_kaydet(st.session_state.db)
-
-                    st.success("İş onaya gönderildi!")
-
-                    st.balloons()
-
-                else:
-
-                    st.error("Fotoğraf yüklemeden devam edemezsiniz!")
-
-        else:
-
-            st.info("Bekleyen işiniz bulunmuyor.")
-
-    # --- PATRON PANELİ ---
+        st.header("👷 Saha İş Bildirimi")
+        yapilacak = [i["is"] for i in st.session_state.db if i["durum"] in ["Bekliyor", "Reddedildi"]]
+        if yapilacak:
+            s = st.selectbox("Bitirdiğiniz İş:", yapilacak)
+            f = st.file_uploader("📷 Fotoğraf Yükle", type=['jpg','png','jpeg'])
+            if st.button("Onaya Gönder") and f:
+                for i in st.session_state.db:
+                    if i["is"] == s:
+                        i["durum"] = "Onay Bekliyor"
+                        i["tarih"] = datetime.now().strftime("%d/%m %H:%M")
+                veriyi_kaydet(st.session_state.db)
+                st.success("Gönderildi!")
+        else: st.info("Bekleyen iş yok.")
 
     else:
-
-        st.header("📊 Şantiye Genel Denetim")
-
-        c1, c2, c3 = st.columns(3)
-
-        biten = len([i for i in st.session_state.db if i["durum"] == "Tamamlandı"])
-
-        bekleyen = len([i for i in st.session_state.db if i["durum"] == "Onay Bekliyor"])
-
+        st.header("📊 Şantiye Durum Özeti")
+        df = pd.DataFrame(st.session_state.db)
        
-
-        c1.metric("Toplam Adım", len(st.session_state.db))
-
-        c2.metric("Tamamlanan", biten)
-
-        c3.metric("Onay Bekleyen", bekleyen)
+        # Kaba ve İnce ilerleme çubukları
+        kaba_biten = len(df[(df['etap'] == 'Kaba') & (df['durum'] == 'Tamamlandı')])
+        ince_biten = len(df[(df['etap'] == 'İnce') & (df['durum'] == 'Tamamlandı')])
+       
+        st.write(f"**Kaba İnşaat İlerleme:** %{int(kaba_biten/6*100)}")
+        st.progress(kaba_biten/6)
+        st.write(f"**İnce İnşaat İlerleme:** %{int(ince_biten/14*100)}")
+        st.progress(ince_biten/14)
 
         st.divider()
-
-        st.subheader("📋 İş Akış Tablosu")
-
-        df = pd.DataFrame(st.session_state.db)
-
         st.dataframe(df, use_container_width=True)
 
-        st.subheader("🔔 Onay Bekleyen Kanıtlar")
+        # Onay Merkezi
+        onay_bekleyen = [i for i in st.session_state.db if i["durum"] == "Onay Bekliyor"]
+        for ob in onay_bekleyen:
+            with st.expander(f"ONAY BEKLİYOR: {ob['is']}"):
+                c1, c2 = st.columns(2)
+                if c1.button(f"ONAYLA - {ob['id']}", type="primary"):
+                    ob["durum"] = "Tamamlandı"
+                    veriyi_kaydet(st.session_state.db)
+                    st.rerun()
+                if c2.button(f"REDDET - {ob['id']}"):
+                    ob["durum"] = "Reddedildi"
+                    veriyi_kaydet(st.session_state.db)
+                    st.rerun()
 
-        onay_listesi = [i for i in st.session_state.db if i["durum"] == "Onay Bekliyor"]
 
-        if onay_listesi:
-
-            for is_kalemi in onay_listesi:
-
-                with st.expander(f"İncele: {is_kalemi['is']}"):
-
-                    st.write(f"Tarih: {is_kalemi['tarih']}")
-
-                    c_onay, c_red = st.columns(2)
-
-                    if c_onay.button(f"ONAYLA - {is_kalemi['id']}", type="primary"):
-
-                        is_kalemi["durum"] = "Tamamlandı"
-
-                        veriyi_kaydet(st.session_state.db)
-
-                        st.rerun()
-
-                    if c_red.button(f"REDDET - {is_kalemi['id']}"):
-
-                        is_kalemi["durum"] = "Reddedildi"
-
-                        veriyi_kaydet(st.session_state.db)
-
-                        st.rerun()
-
-        else:
-
-            st.write("Onay bekleyen bildirim yok.")
 
 
